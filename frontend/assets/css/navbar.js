@@ -20,17 +20,33 @@ export const styles = StyleSheet.create({
       borderBottomRightRadius: 0,
     },
     iconbar:{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        padding: 0,
-        justifyContent: 'space-between', // Added for equivalent to gap
-        paddingHorizontal: 55, // Added for equivalent to gap
-        position: 'absolute',
-        width: 287.26,
-        height: 65,
-        left: 48,
-        top: 715,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent:'center',
+      paddingHorizontal: 5, // Padding equivalent to gap
+      position: 'absolute',
+      width: 287.26,
+      height: 65,
+      left: 35,
+      justifyContent: 'space-between',
+    },
+    homeIcon: {
+      width: 24,
+      height: 24,
+      backgroundColor: 'rgba(0, 255, 24, 0.12)',
+      borderRadius: 6,
+      flex: 0,
+      flexGrow: 0,
+    },
+    gradientContainer :{
+      flex: 1, /* Ensure the gradient fills the entire container */
+      borderRadius: 6, /* Adjust the border radius as needed */
+    },
+    iconMask :{
+      flex: 1, /* Ensure the icon fills the container */
+      justifyContent: 'center', /* Center the icon vertically */
+      alignItems: 'center', /* Center the icon horizontally */
     },
   });
+  
   
