@@ -61,7 +61,19 @@ export const styles = StyleSheet.create({
   },
   checkIcon:{
     color: '#FFF',
-  }
+  },
+  MapIconContainer: {
+    position: 'absolute',
+    left: 8, // Adjust the position as needed
+    top: '50%', // Center vertically
+    transform: [{ translateY: -9 }], // Adjust the translateY to center vertically
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#979797',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   
   });
   

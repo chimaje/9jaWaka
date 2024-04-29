@@ -9,14 +9,15 @@ const destinbar = ()=> {
                 <Icon name="arrowleft" size={24} style={styles.arrowIcon}/>
                 <View style={styles.destinput}>
                     <View style={styles.inputContainer}>
-                        <TextInput style={styles.input}placeholder='Search ..'>
-                        <Icon name="enviroment" size={18} style = {styles.searchIcon} color="#cccc"/>
-                        </TextInput>
+                        <TextInput style={styles.input} />
+                        <View style={styles.MapIconContainer}>
+                            <Icon name="enviroment" size={13} color="#374151" />
+                        </View>
                     </View>
                     <View style={styles.inputContainer}>
                         <TextInput style={styles.input}  />
                         <View style={styles.checkIconContainer}>
-                            <Icon name="check" size={18} style={styles.checkIcon} color="#FFFF" />
+                            <Icon name="check" size={13} style={styles.checkIcon} color="#FFFF" />
                         </View>
                     </View>
                 </View>
