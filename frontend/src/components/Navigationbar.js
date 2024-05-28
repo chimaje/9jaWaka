@@ -1,3 +1,4 @@
+//TabMenu
 import React from 'react';
 import {View,Text,TouchableOpacity,Button} from 'react-native';
 import Icon from 'react-native-vector-icons/Octicons';
@@ -8,15 +9,15 @@ import { styles} from '../../assets/css/navbar';
 
 
 
-const TabMenu = () => {
+const TabMenu = ({ navigation }) => {
     return(
         <View style={styles.navBar}>
                 <View style={styles.iconbar}>
-                    <Icon name="home" size={24} color="#47FE6B" style={styles.homeIcon} />
+                    <Icon name="home" size={24} color="#47FE6B" style={styles.homeIcon} onPress={() => navigation.navigate('Home')}/>
                     {/* <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.gradientContainer}> */}
-                        <IconAntDesign name="enviroment" size={24} color="#47FE6B" />
+                        <IconAntDesign name="enviroment" size={24} color="#47FE6B" onPress={() => navigation.navigate('Search')} />
                     {/* </LinearGradient>           */}
-                    <IconMap name ="map" size={24} color="#47FE6B"/>
+                    <IconMap name ="map" size={24} color="#47FE6B" onPress={() => navigation.navigate('Map')}/>
                     <IconMap name ="line-graph" size = {24} color="#47FE6B" />
                 </View>
         </View>

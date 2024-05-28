@@ -1,41 +1,76 @@
-//mapdisplay.js
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useState , useEffect} from 'react';
+import { StyleSheet, View, Dimensions } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import useLocation from '../hooks/useLocation'; // Import the useLocation hook
+import * as Location from 'expo-location';
 
-const MapScreen = () => {
-  const location = useLocation(); // Use the useLocation hook to get the user's location
+const MapScreen = ({ destination }) => {
+  const [marker, setCoords] = useState({ latitude: 0, longitude: 0 });
+  const [locate,setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [isMarkerDisplayed, setIsMarkerDisplayed] = useState(false);
 
-  // Default initial region
-  const defaultRegion = {
-    latitude: 37.78825, // Default latitude
-    longitude: -122.4324, // Default longitude
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+  useEffect(() => {
+    if (destination) {
+      setCoords({ latitude: destination.latitude, longitude: destination.longitude });
+    }
+  }, [destination]);
+  useEffect(() => {
+    // Request permission to access the user's location
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permission to access location was denied');
+        return;
+      }
+
+      // Get the user's current location
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      // Set the user's location as the initial marker coordinates
+      setLocation({ latitude, longitude });
+    })();
+  }, []);
+  
+
+  const handlePress = (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setCoords({ latitude, longitude });
+    setIsMarkerDisplayed(!isMarkerDisplayed);
   };
 
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
-        initialRegion={location ? {
-          latitude: location.latitude,
-          longitude: location.longitude,
+        region={destination ? {
+          latitude: destination.latitude,
+          longitude: destination.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
-        } : defaultRegion} // Use defaultRegion if location is not available
+        } : {
+          latitude: locate.latitude,
+          longitude: locate.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        onPress={handlePress}
       >
-        {/* {location && ( // Render the marker only if location is available
+        {destination && (
           <Marker
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title="Your Location"
-            description="You are here"
+            coordinate={destination}
+            title="Destination"
+            description="Selected Destination"
           />
-        )} */}
+        )}
+
+        {isMarkerDisplayed && (
+          <Marker
+            coordinate={marker}
+            title="Marker Title"
+            description="Marker Description"
+            onPress={() => setIsMarkerDisplayed(false)}
+          />
+        )}
       </MapView>
     </View>
   );
@@ -48,53 +83,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   map: {
-    ...StyleSheet.absoluteFillObject,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
 });
 
 export default MapScreen;
-
-
-
-
-
-// // MapScreen.js
-// import React from 'react';
-// import { StyleSheet, View, Dimensions } from 'react-native';
-// import MapView, { Marker } from 'react-native-maps';
-
-// const MapScreen = () => {
-//   return (
-//     <View style={styles.container}>
-//       <MapView
-//         style={styles.map}
-//         initialRegion={{
-//           latitude: 37.78825,
-//           longitude: -122.4324,
-//           latitudeDelta: 0.0922,
-//           longitudeDelta: 0.0421,
-//         }}
-//       >
-//         <Marker
-//           coordinate={{ latitude: 37.78825, longitude: -122.4324 }}
-//           title="Marker Title"
-//           description="Marker Description"
-//         />
-//       </MapView>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   map: {
-//     width: Dimensions.get('window').width,
-//     height: Dimensions.get('window').height,
-//   },
-// });
-
-// export default MapScreen;
