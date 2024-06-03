@@ -20,5 +20,5 @@ from bus_stops.views import NearbyBusStopList
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-     path('nearby-bus-stops/', NearbyBusStopList.as_view(), name='nearby-bus-stops'),
+     path('api/nearby-bus-stops/', NearbyBusStopList.as_view(), name='nearby-bus-stops'),
 ]
