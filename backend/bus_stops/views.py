@@ -12,4 +12,3 @@ class NearbyBusStopList(generics.ListAPIView):
         longitude = float(self.request.query_params.get('longitude'))
         user_location = Point(longitude, latitude, srid=4326)
         return BusStop.objects.annotate(distance=Distance('location', user_location)).order_by('distance')[:10]
-

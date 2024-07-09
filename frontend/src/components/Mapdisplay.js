@@ -1,18 +1,34 @@
-import React, { useState , useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
+import * as Network from 'expo-network';
 
-const MapScreen = ({ destination }) => {
+const MapScreen = ({ destination, route, busstops, endlocation }) => {
+  const [busStops, setBusStops] = useState([]);
   const [marker, setCoords] = useState({ latitude: 0, longitude: 0 });
-  const [locate,setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [locate, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isMarkerDisplayed, setIsMarkerDisplayed] = useState(false);
+  const [ipAddress, setIpAddress] = useState('');
+
+  useEffect(() => {
+    const fetchIpAddress = async () => {
+      const ip = await Network.getIpAddressAsync();
+      setIpAddress(ip);
+    };
+
+    fetchIpAddress();
+  }, []);
 
   useEffect(() => {
     if (destination) {
       setCoords({ latitude: destination.latitude, longitude: destination.longitude });
     }
+    if (destination && destination.latitude && destination.longitude) {
+      fetchNearbyBusStops(destination.latitude, destination.longitude);
+    }
   }, [destination]);
+
   useEffect(() => {
     // Request permission to access the user's location
     (async () => {
@@ -28,14 +44,44 @@ const MapScreen = ({ destination }) => {
 
       // Set the user's location as the initial marker coordinates
       setLocation({ latitude, longitude });
+      // Send the user location to find nearby bus stops
+      fetchNearbyBusStops(latitude, longitude);
     })();
   }, []);
-  
 
   const handlePress = (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
     setCoords({ latitude, longitude });
     setIsMarkerDisplayed(!isMarkerDisplayed);
+  };
+
+  const fetchNearbyBusStops = async (latitude, longitude) => {
+    try {
+      console.log('response');
+      const response = await fetch(`http://10.188.175.158:8000/api/nearby-bus-stops/?latitude=${latitude}&longitude=${longitude}`);
+      const data = await response.json();
+      if (!Array.isArray(data)) {
+        console.error('Expected an array from API, received:', data);
+        return;
+      }
+      const parsedBusStops = data.map(busStop => {
+        const match = busStop.location.match(/POINT \(([^ ]+) ([^ ]+)\)/);
+        if (!match) {
+          console.error('Failed to parse bus stop location:', busStop.location);
+          return null;
+        }
+        const [longitude, latitude] = match.slice(1, 3).map(Number);
+        return {
+          ...busStop,
+          latitude,
+          longitude,
+        };
+      }).filter(busStop => busStop !== null);
+
+      setBusStops(parsedBusStops);
+    } catch (error) {
+      console.error('Error fetching nearby bus stops:', error);
+    }
   };
 
   return (
@@ -47,6 +93,11 @@ const MapScreen = ({ destination }) => {
           longitude: destination.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
+        } : endlocation ? {
+          latitude: endlocation.latitude,
+          longitude: endlocation.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
         } : {
           latitude: locate.latitude,
           longitude: locate.longitude,
@@ -55,11 +106,12 @@ const MapScreen = ({ destination }) => {
         }}
         onPress={handlePress}
       >
-        {destination && (
+        {(destination || endlocation) && (
           <Marker
-            coordinate={destination}
+            coordinate={destination || endlocation}
             title="Destination"
             description="Selected Destination"
+            pinColor='#47FE6B'
           />
         )}
 
@@ -69,8 +121,42 @@ const MapScreen = ({ destination }) => {
             title="Marker Title"
             description="Marker Description"
             onPress={() => setIsMarkerDisplayed(false)}
+            pinColor='#47FE6B'
           />
         )}
+
+        {busStops.length > 0 && busStops.map(busStop => (
+          <Marker
+            key={busStop.bus_stop_id }
+            coordinate={{
+              latitude: busStop.latitude,
+              longitude: busStop.longitude,
+            }}
+            title={busStop.name}
+            pinColor='#47FE6B'
+          />
+        ))}
+
+        {busstops && busstops.length > 0 && busstops.map(busStop => (
+          <Marker
+            key={busStop.bus_stop_id }
+            coordinate={{
+              latitude: busStop.latitude,
+              longitude: busStop.longitude,
+            }}
+            title={busStop.name}
+            pinColor='#47FE6B'
+          />
+        ))}
+
+
+        {route && (
+                  <Polyline
+                    coordinates={route}
+                    strokeColor="#000"
+                    strokeWidth={6}
+                  />
+                )}
       </MapView>
     </View>
   );

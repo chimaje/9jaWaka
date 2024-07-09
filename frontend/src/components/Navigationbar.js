@@ -17,7 +17,7 @@ const TabMenu = ({ navigation }) => {
                     {/* <LinearGradient colors={['#4c669f', '#3b5998', '#192f6a']} style={styles.gradientContainer}> */}
                         <IconAntDesign name="enviroment" size={24} color="#47FE6B" onPress={() => navigation.navigate('Search')} />
                     {/* </LinearGradient>           */}
-                    <IconMap name ="map" size={24} color="#47FE6B" onPress={() => navigation.navigate('Map')}/>
+                    <IconMap name ="map" size={24} color="#47FE6B" onPress={() => navigation.navigate('Mapdestin')}/>
                     <IconMap name ="line-graph" size = {24} color="#47FE6B" />
                 </View>
         </View>
