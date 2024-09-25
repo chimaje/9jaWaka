@@ -8,7 +8,7 @@ class BusStopAdmin(GISModelAdmin):  # Use GISModelAdmin for GIS functionality
 
 @admin.register(Route)
 class RouteAdmin(GISModelAdmin):  # Use GISModelAdmin for GIS functionality
-    list_display = ('start_location', 'end_location', 'cost')
+    list_display = ('route_id','start_location', 'end_location', 'cost')
 
 @admin.register(BusOption)
 class BusOptionAdmin(GISModelAdmin):  # Use GISModelAdmin for GIS functionality

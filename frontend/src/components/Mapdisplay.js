@@ -1,15 +1,17 @@
+//mapdisplay.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import * as Network from 'expo-network';
 
-const MapScreen = ({ destination, route, busstops, endlocation }) => {
+const MapScreen = ({ destination, route, busstops, endlocation,isbusMarkerDisplayed }) => {
   const [busStops, setBusStops] = useState([]);
   const [marker, setCoords] = useState({ latitude: 0, longitude: 0 });
   const [locate, setLocation] = useState({ latitude: 0, longitude: 0 });
   const [isMarkerDisplayed, setIsMarkerDisplayed] = useState(false);
   const [ipAddress, setIpAddress] = useState('');
+
 
   useEffect(() => {
     const fetchIpAddress = async () => {
@@ -56,9 +58,10 @@ const MapScreen = ({ destination, route, busstops, endlocation }) => {
   };
 
   const fetchNearbyBusStops = async (latitude, longitude) => {
+   
     try {
       console.log('response');
-      const response = await fetch(`http://10.188.175.158:8000/api/nearby-bus-stops/?latitude=${latitude}&longitude=${longitude}`);
+      const response = await fetch(`http://192.168.136.194:8000/api/nearby-bus-stops/?latitude=${latitude}&longitude=${longitude}`);
       const data = await response.json();
       if (!Array.isArray(data)) {
         console.error('Expected an array from API, received:', data);
@@ -106,14 +109,14 @@ const MapScreen = ({ destination, route, busstops, endlocation }) => {
         }}
         onPress={handlePress}
       >
-        {(destination || endlocation) && (
+        {((destination || endlocation) && (
           <Marker
             coordinate={destination || endlocation}
             title="Destination"
             description="Selected Destination"
-            pinColor='#47FE6B'
+            pinColor='#DE3232'
           />
-        )}
+        ))||(<Marker coordinate={locate} title="User Location" pinColor='#DE3232'/>)}
 
         {isMarkerDisplayed && (
           <Marker
@@ -125,7 +128,7 @@ const MapScreen = ({ destination, route, busstops, endlocation }) => {
           />
         )}
 
-        {busStops.length > 0 && busStops.map(busStop => (
+        {isbusMarkerDisplayed&&busStops.length > 0 && busStops.map(busStop => (//this is for fetchnearbybusstops
           <Marker
             key={busStop.bus_stop_id }
             coordinate={{
@@ -137,7 +140,7 @@ const MapScreen = ({ destination, route, busstops, endlocation }) => {
           />
         ))}
 
-        {busstops && busstops.length > 0 && busstops.map(busStop => (
+        {busstops && busstops.length > 0 && busstops.map(busStop => (//this is for fetchrouteandbusstops
           <Marker
             key={busStop.bus_stop_id }
             coordinate={{
@@ -153,7 +156,7 @@ const MapScreen = ({ destination, route, busstops, endlocation }) => {
         {route && (
                   <Polyline
                     coordinates={route}
-                    strokeColor="#000"
+                    strokeColor="#47FE7B"
                     strokeWidth={6}
                   />
                 )}

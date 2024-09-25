@@ -1,3 +1,4 @@
+//mapsearch.js
 import React, {useState,useEffect}from 'react';
 import {StyleSheet, View } from 'react-native';
 import MapScreen from '../components/Mapdisplay';
@@ -7,6 +8,7 @@ import {useIsFocused} from '@react-navigation/native'
 
 const Mapsearch = ({navigation}) => {
   const [destination, setDestination] = useState(null);
+
   const [query, setQuery] = useState('');
   const isFocused = useIsFocused();
 

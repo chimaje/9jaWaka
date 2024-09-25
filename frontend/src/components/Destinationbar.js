@@ -1,3 +1,4 @@
+//destinbar
 import React from 'react';
 import { View, TextInput } from 'react-native';
 import { styles } from "../../assets/css/destinabar";
@@ -8,6 +9,7 @@ const Destinbar = ({ startLocation, setStartLocation, endLocation, setEndLocatio
   const handleKey = (event) => {
     if (event.nativeEvent.key === 'Enter'){
       Keyboard.dismiss();
+
       console.log(startLocation)
       console.log(endLocation)
       onSearch();

@@ -1,3 +1,4 @@
+//searchbar
 import React, { useState, useEffect } from 'react';
 import { View, TextInput } from 'react-native';
 import { styles } from '../../assets/css/searchBar';
