@@ -1,3 +1,4 @@
+#models.py
 from django.contrib.gis.db import models
 
 class BusStop(models.Model):

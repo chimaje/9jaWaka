@@ -1,62 +1,42 @@
-import React, { useState, useEffect  } from 'react';
-import { View } from 'react-native';
+//mapdestin.js
+import React, { useState, useEffect } from 'react';
+import { View, Keyboard } from 'react-native';
 import MapScreen from '../components/Mapdisplay';
 import TabMenu from '../components/Navigationbar';
 import Destinbar from '../components/Destinationbar';
+import BusOption from '../components/Busoption';
 import * as Network from 'expo-network';
 
 const Mapdestin = ({ navigation }) => {
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
-  const [route,setRoute]=useState(null);
-  const [busstops,setBusStops] = useState(null);
-  const [enddestin,SetendDestin]=useState({ latitude: 0, longitude: 0 });
+  const [route, setRoute] = useState(null);
+  const [busStops, setBusStops] = useState(null);
+  const [busOptions, setBusOptions] = useState(null); // Add state for bus options
+  const [endDestin, setEndDestin] = useState({ latitude: 0, longitude: 0 });
   const [ipAddress, setIpAddress] = useState('');
-
+  const [isbusMarkerDisplayed, setIsbusMarkerDisplayed] = useState(false);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      // Reset the search query when leaving the Mapsearch screen
+      setIsbusMarkerDisplayed(!isbusMarkerDisplayed);
+    });
+    
+    return unsubscribe;
+    
+  }, [navigation]);
   useEffect(() => {
     const fetchIpAddress = async () => {
       const ip = await Network.getIpAddressAsync();
+      console.log(ip);
       setIpAddress(ip);
     };
 
     fetchIpAddress();
   }, []);
 
-  // const fetchRoute_busstops = async() =>{
-  //   if (startLocation && endLocation){
-  //     try{
-  //        // Fetch coordinates for start location
-  //        const startResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(startLocation)}`);
-  //        const startData = await startResponse.json();
-  //        if (startData.length > 0) {
-  //          const { lat: startLat, lon: startLon } = startData[0];
- 
-  //          // Fetch coordinates for end location
-  //          const endResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endLocation)}`);
-  //          const endData = await endResponse.json();
-  //          if (endData.length > 0) {
-  //            const { lat: endLat, lon: endLon } = endData[0];
-  //            SetendDestin(endLat,endLon);
-  //            //api call to get route and busstops
-  //             const response = await fetch(`http://192.168.21.159:8081/api/calculate-route/?latitude=${startLat}&longitude=${startLon}&destination_latitude=${endLat}&destination_longitude=${endLon}`);
-  //             const data = await response.json();
-  //             setRoute(data.route);
-  //             setBusStops(data.bus_stops);
-  //          }else{
-  //           console.warn('Destination not found')
-  //          }
-  //       }else{
-  //         console.warn('Start location not found')
-  //        }
-  //     }
-  //     catch(error){
-  //       console.error('Error fetching route and busstops',route)
-  //     }
-  //   }
-    
-  // };
   useEffect(() => {
-    const fetchRoute_busstops = async () => {
+    const fetchRouteBusStops = async () => {
       if (startLocation && endLocation) {
         try {
           // Fetch coordinates for start location
@@ -80,10 +60,10 @@ const Mapdestin = ({ navigation }) => {
           }
   
           const { lat: endLat, lon: endLon } = endData[0];
-          SetendDestin({ latitude: endLat, longitude: endLon });
+          setEndDestin({ latitude: endLat, longitude: endLon });
   
           // API call to get route and bus stops
-          const response = await fetch(`http://10.188.175.158:8000/api/calculate-route/?latitude=${startLat}&longitude=${startLon}&destination_latitude=${endLat}&destination_longitude=${endLon}`);
+          const response = await fetch(`http://192.168.136.194:8000/api/calculate-route/?latitude=${startLat}&longitude=${startLon}&destination_latitude=${endLat}&destination_longitude=${endLon}`);
   
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -91,6 +71,7 @@ const Mapdestin = ({ navigation }) => {
   
           const data = await response.json();
           console.log("API Response Data:", data);
+          
           // Parse bus stops from the data
           if (data.bus_stops) {
             const parsedBusStops = data.bus_stops.map(busStop => {
@@ -106,11 +87,11 @@ const Mapdestin = ({ navigation }) => {
                 longitude,
               };
             }).filter(busStop => busStop !== null);
-  
+            
             setBusStops(parsedBusStops);
           }
+
           // Parse route data and set state
-          // console.log(data.route);
           if (data.route && data.route.geometry && data.route.geometry.coordinates) {
             const routeCoordinates = data.route.geometry.coordinates.map(coord => ({
               latitude: parseFloat(coord[1]),
@@ -118,21 +99,27 @@ const Mapdestin = ({ navigation }) => {
             }));
             console.log('Route Coordinates:', routeCoordinates);
             setRoute(routeCoordinates);
-          }else {
+          } else {
             console.warn('No route found');
+          }
+
+          // Set bus options from data
+          if (data.bus_options) {
+            setBusOptions(data.bus_options);
+            
           }
   
         } catch (error) {
           console.error('Error fetching route and bus stops:', error);
         }
       } else {
-        console.warn('Start or end location is missing');
+        console.log('Start or end location is missing');
       }
     };
   
-    fetchRoute_busstops();
+    fetchRouteBusStops();
   }, [startLocation, endLocation]);
-  
+
   return (
     <View style={{ flex: 1 }}>
       <Destinbar
@@ -142,13 +129,16 @@ const Mapdestin = ({ navigation }) => {
         setEndLocation={setEndLocation}
         onSearch={() => {
           Keyboard.dismiss();
-          fetchRoute_busstops();
+          fetchRouteBusStops();
         }}
       />
       <MapScreen 
-      endLocation={enddestin} 
-      route = {route}
-      busstops = {busstops}/>
+        endLocation={endDestin} 
+        route={route}
+        busStops={busStops}
+        isbusMarkerDisplayed = {isbusMarkerDisplayed}
+      />
+      {busOptions && <BusOption busOptions={busOptions} />}
       <TabMenu navigation={navigation} />
     </View>
   );
